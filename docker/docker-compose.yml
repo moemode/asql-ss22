@@ -1,0 +1,23 @@
+version: '3.5'
+
+services:
+    postgres-adv:
+        container_name: db-adv
+        image: "postgres:12" # use PG12 as base image
+        environment:
+            POSTGRES_USER: ${POSTGRES_USER:-postgres}
+            POSTGRES_PASSWORD: root
+            POSTGRES_HOST_AUTH_METHOD: trust # allow connections to PG without a password (NEVER do this in production!)
+            PGDATA: /data/postgres
+        volumes:
+            - postgres-adv:/data/postgres # make the database persistent
+            - type: bind # add a filesystem link
+              source: ../ # from host ../
+              target: /home/root/files # to docker /home/root/files
+            - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+        working_dir: /home/root/files
+        ports:
+            - "5433:5432" # expose postgres default port
+        restart: unless-stopped
+volumes:
+    postgres-adv:
