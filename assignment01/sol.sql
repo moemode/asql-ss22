@@ -45,3 +45,66 @@ SELECT item AS complete
 FROM production as p
 GROUP BY item
 HAVING EVERY (completion IS NOT NULL);
+
+
+--- 4
+DROP TABLE IF EXISTS A;
+CREATE TABLE A (
+row int,
+col int,
+val int,
+PRIMARY KEY(row, col));
+
+DROP TABLE IF EXISTS B;
+CREATE TABLE B ( LIKE A );
+
+INSERT INTO A (row,col,val)
+VALUES (1,1,1), (1,2,2),
+(2,1,3), (2,2,4);
+
+INSERT INTO B (row,col,val)
+VALUES (1,1,1), (1,2,2), (1,3,1),
+(2,1,2), (2,2,1), (2,3,2);
+
+-- (a) Formulate a SQL query, which performs matrix multiplication
+SELECT A.row, B.col, SUM(A.val*B.val)
+FROM A, B
+WHERE A.col = B.row
+GROUP BY A.row, B.col
+ORDER BY A.row, B.col;
+
+-- (b) sparse matrices
+DELETE FROM A;
+DELETE FROM B;
+
+INSERT INTO A (row,col,val)
+VALUES (1,1,1), (1,2,3),
+(2,3,7);
+
+INSERT INTO B (row,col,val)
+VALUES (1,1,4), (1,3,8 ),
+(2,1,1), (2,2,1), (2,3,10),
+(3,1,3), (3,2,6);
+
+-- also produces the correct result on sparse matrix
+SELECT A.row, B.col, SUM(A.val*B.val)
+FROM A, B
+WHERE A.col = B.row
+GROUP BY A.row, B.col
+ORDER BY A.row, B.col;
+
+-- also "works" if dimensions don't match by ignoring values
+DELETE FROM B;
+
+INSERT INTO B (row,col,val)
+VALUES (1,1,4), (1,3,8 ),
+(2,1,1), (2,2,1), (2,3,10),
+(3,1,3), (3,2,6),
+(4,1,10);
+
+SELECT A.row, B.col, SUM(A.val*B.val)
+FROM A, B
+WHERE A.col = B.row
+GROUP BY A.row, B.col
+ORDER BY A.row, B.col;
+
