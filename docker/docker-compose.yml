@@ -3,7 +3,7 @@ version: '3.5'
 services:
     postgres-adv:
         container_name: db-adv
-        image: "postgres:12" # use PG12 as base image
+        image: "postgres:14" # use PG12 as base image
         environment:
             POSTGRES_USER: ${POSTGRES_USER:-postgres}
             POSTGRES_PASSWORD: root
