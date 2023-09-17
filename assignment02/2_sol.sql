@@ -20,7 +20,8 @@ VALUES
 -- (a) Write a SQL query using GROUP BY ROLLUP (no WITH RECURSIVE or user-defined functions) which pro-
 -- duces a tree in which each node holds the sum of all labels in its subtree. Leaves keep their original
 -- values.
-SELECT level_a, level_b, level_c, level_d, SUM(leaf_value) FROM tree
+SELECT DISTINCT ON((level_a IS NULL) :: int + (level_b IS NULL) :: int + (level_c IS NULL) :: int + (level_d IS NULL) :: int, level_a, level_b, level_c, level_d)
+level_a, level_b, level_c, level_d, SUM(leaf_value) FROM tree
 GROUP BY ROLLUP(level_a, level_b, level_c, level_d)
 HAVING level_a IS NOT NULL
 ORDER BY (level_a IS NULL) :: int + (level_b IS NULL) :: int + (level_c IS NULL) :: int + (level_d IS NULL) :: int, level_a, level_b, level_c, level_d
@@ -70,3 +71,16 @@ path_counts.level_b=leaves.level_b AND
 path_counts.level_c=leaves.level_c AND
 path_counts.level_d=leaves.level_d
 ORDER BY (path_counts.level_a IS NULL) :: int + (path_counts.level_b IS NULL) :: int + (path_counts.level_c IS NULL) :: int + (path_counts.level_d IS NULL) :: int, path_counts.level_a, path_counts.level_b, path_counts.level_c, path_counts.level_d;
+
+
+-- (c) Let the tree describe a tournament in which the leaves and their values represent contestants
+-- and their skill level, respectively. When siblings compete, the contestant with the higher skill level
+-- proceeds to the parent node. On a tie, either contestant may proceed.
+-- Write a SQL query similar to (a), to determine the winning skill values for each competition. The
+-- tree root will hold the overall winning skill value
+SELECT DISTINCT ON((level_a IS NULL) :: int + (level_b IS NULL) :: int + (level_c IS NULL) :: int + (level_d IS NULL) :: int, level_a, level_b, level_c, level_d)
+level_a, level_b, level_c, level_d, MAX(leaf_value) FROM tree
+GROUP BY ROLLUP(level_a, level_b, level_c, level_d)
+HAVING level_a IS NOT NULL
+ORDER BY (level_a IS NULL) :: int + (level_b IS NULL) :: int + (level_c IS NULL) :: int + (level_d IS NULL) :: int, level_a, level_b, level_c, level_d
+;
