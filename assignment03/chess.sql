@@ -50,19 +50,18 @@ VALUES (4,4,'♞'),
 -- board at position (x,y). If no piece is located at (x,y), the table holds 
 -- row (x,y,' '). The resulting table has a cardinality of :board_width * :board_height.
 WITH board_and_pieces(x,y,piece) AS ( 
-  SELECT xcord, ycord, (
-    SELECT board.piece from board WHERE
-    board.x=xcord AND board.y=ycord
-  )
+  SELECT xcord, ycord, COALESCE(board.piece, ' ')
   FROM generate_series(1, 8) AS xcord
   CROSS JOIN generate_series(1, 8) AS ycord
+  LEFT OUTER JOIN board
+  ON(board.x=xcord AND board.y=ycord)
 )
---SELECT * FROM board_and_pieces;
+--SELECT * FROM board_and_pieces WHERE piece=' ';
 ,
 -- This table holds a row (x,y,'0'), exactly if one move of any piece on the 
 -- board can reach position (x,y).
 possible_movements(x,y,piece) AS (
-  SELECT x+movement.x_mov, y+movement.y_mov, board.piece FROM board, piece_movements, movement
+  SELECT x+movement.x_mov, y+movement.y_mov, '0' FROM board, piece_movements, movement
   WHERE board.piece=piece_movements.piece
   AND piece_movements.move_id=movement.id
 ),
