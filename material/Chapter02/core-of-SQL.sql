@@ -26,7 +26,6 @@ TABLE T;
 SELECT t
 FROM   T AS t;
 
-
 -----------------------------------------------------------------------
 -- Create table T1 identical to T, but create the row type τ first
 
@@ -133,7 +132,7 @@ WHERE  t.d IS NULL;
 
 -- A =-comparison with NULL yields NULL:
 
-SELECT t.d, t.d IS NULL AS "IS NULLL", t.d = NULL AS "= NULL"   -- ⚠ t.d = NULL yields NULL ≠ true
+SELECT t.d, t.d IS NULL AS "IS NULL", t.d = NULL AS "= NULL"   -- ⚠ t.d = NULL yields NULL ≠ true
 FROM   T AS t;
 
 
@@ -152,7 +151,7 @@ WHERE  t1.a BETWEEN t2.a - 1 AND t2.a + 1;
 
 SELECT 2 + (SELECT t.d AS _
             FROM   T AS t
-            WHERE  t.a = 2)  AS "The Answer";   -- ⚠ t.a = 0,  t.a > 2
+            WHERE  t.a = 0)  AS "The Answer";   -- ⚠ t.a = 0,  t.a > 2
 
 --                 └──┬──┘
 --      equality predicate on key column,
@@ -208,6 +207,10 @@ WHERE  t1.b <> (SELECT t2.b
 
 SELECT t.*
 FROM   T AS t
+ORDER BY t.d DESC;
+
+SELECT t.*
+FROM   T AS t
 ORDER BY t.d ASC NULLS FIRST;  -- default: NULL larger than any non-NULL value
 
 SELECT t.*
@@ -218,12 +221,18 @@ SELECT t.*, t.d / t.a AS ratio
 FROM   T AS t
 ORDER BY ratio;                -- may refer to computed columns
 
-
 VALUES (1, 'one'),
        (2, 'two'),
        (3, 'three')
 ORDER BY column1 DESC;
 
+-- order is local to subquery
+SELECT t1.*
+FROM (SELECT t2.*
+      FROM T AS t2
+      ORDER BY t2.a) AS t1;
+
+    
 
 SELECT t.*
 FROM   T AS t
