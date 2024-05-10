@@ -47,6 +47,8 @@ HAVING bool_and(p.completion IS NOT NULL);
 
 -- Task 4: Matrix Multiplication
 
+-- (a)
+
 DROP TABLE IF EXISTS A;
 DROP TABLE IF EXISTS B;
 -- Create table for Matrix A
@@ -81,24 +83,28 @@ VALUES
 
 -- SQL query to perform matrix multiplication A ⋅ B with aliases
 -- Resulting matrix will have dimensions (m x p)
-SELECT A.row AS result_row,
-       B.col AS result_col,
-       SUM(A.val * B.val) AS result_val
+SELECT A.row AS row,
+       B.col AS col,
+       SUM(A.val * B.val) AS val
 FROM A
 JOIN B ON A.col = B.row  -- Match columns of A with rows of B
 GROUP BY A.row, B.col
-ORDER BY result_row, result_col;
+ORDER BY row, col;
+
+-- (b)
+DELETE FROM A;
+DELETE FROM B;
 
 
 -- Insert sample data for Matrix A (sparse matrix)
-INSERT INTO A (row_index, col_index, value)
+INSERT INTO A (row, col, val)
 VALUES
     (1, 1, 1),
     (1, 2, 3),
     (2, 3, 7);
 
 -- Insert sample data for Matrix B (sparse matrix)
-INSERT INTO B (row_index, col_index, value)
+INSERT INTO B (row, col, val)
 VALUES
     (1, 1, 4),
     (1, 3, 8),
@@ -107,3 +113,15 @@ VALUES
     (2, 3, 10),
     (3, 1, 3),
     (3, 2, 6);
+
+
+-- for sparse matrices the values for returned entries are correct
+-- but the dimensions might be unclear
+
+SELECT A.row AS row,
+       B.col AS col,
+       SUM(A.val * B.val) AS val
+FROM A
+JOIN B ON A.col = B.row  -- Match columns of A with rows of B
+GROUP BY A.row, B.col
+ORDER BY row, col;
