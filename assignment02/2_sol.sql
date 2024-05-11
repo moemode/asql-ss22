@@ -44,3 +44,11 @@ FROM combined
 WHERE level_a is NOT NULL
 ORDER BY level_a, level_b, level_c, level_d, count;
 
+
+-- (c)
+SELECT level_a, level_b, level_c, level_d, MAX(leaf_value) FROM tree
+GROUP BY ROLLUP(level_a, level_b, level_c, level_d)
+HAVING level_a IS NOT NULL
+ORDER BY (level_a IS NULL) :: int + (level_b IS NULL) :: int + (level_c IS NULL) :: int + (level_d IS NULL) :: int;
+
+
