@@ -117,7 +117,7 @@ SELECT COUNT(*) = (
         UNION 
         SELECT * FROM L3
     ) AS combined
-) AS L2_EQ_L3
+) AS L2EqL3
 FROM L2;
 
 --
