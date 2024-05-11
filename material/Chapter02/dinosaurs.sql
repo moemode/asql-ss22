@@ -28,8 +28,31 @@ INSERT INTO dinosaurs(species, height, length, legs) VALUES
 
 TABLE dinosaurs;
 
+CREATE TEMP TABLE L1 AS 
+WITH bodies(legs, shape) AS (
+  SELECT d.legs, AVG(d.height / d.length) AS shape
+  FROM dinosaurs AS d
+  WHERE d.legs IS NOT NULL
+  GROUP BY d.legs
+),
+
+legs AS (
+  SELECT d.species, d.height, d.length,
+  COALESCE(d.legs,
+    (SELECT b.legs
+    FROM bodies AS b 
+    ORDER BY ABS(b.shape - (d.height/d.length))
+    LIMIT 1)
+    ) AS calculated_legs
+FROM dinosaurs as d
+)
+TABLE legs;
+
+
+
 -- ➊ Determine characteristic height/length (= body shape) ratio
 -- separately for bipedal and quadropedal dinosaurs:
+CREATE TEMP TABLE L2 AS 
 WITH bodies(legs, shape) AS (
   SELECT d.legs, AVG(d.height / d.length) AS shape
   FROM   dinosaurs AS d
@@ -51,16 +74,52 @@ SELECT d.*
 FROM   dinosaurs AS d
 WHERE  d.legs IS NOT NULL;
 
+SELECT COUNT(*) = (
+    SELECT COUNT(*) 
+    FROM (
+        SELECT * FROM L1
+        UNION 
+        SELECT * FROM L2
+    ) AS combined
+) AS L1EqL2
+FROM L1;
+
 
 -----------------------------------------------------------------------
 -- Equivalent formulation using DISTINCT ON (w/o LIMIT)
 
+CREATE TEMP TABLE L3 AS
 WITH bodies(legs, shape) AS (
   SELECT d.legs, AVG(d.height / d.length) AS shape
   FROM   dinosaurs AS d
   WHERE  d.legs IS NOT NULL
   GROUP BY d.legs
 )
+SELECT d.species, d.height, d.length,
+       (SELECT DISTINCT ON (d.species) b.legs                               -- Find the shape entry in bodies
+        FROM   bodies AS b                          -- that matches d's ratio of
+        ORDER BY d.species, abs(b.shape - d.height / d.length) -- height to length the closest
+        ) AS legs                            -- (pick row with minimal shape difference)
+FROM  dinosaurs AS d
+WHERE d.legs IS NULL
+                      -- ↑ Locomotion of dinosaur d is unknown
+  UNION ALL           ----------------------------------------
+                      -- ↓ Locomotion of dinosaur d is known
+SELECT d.*
+FROM   dinosaurs AS d
+WHERE  d.legs IS NOT NULL;
+
+
+SELECT COUNT(*) = (
+    SELECT COUNT(*) 
+    FROM (
+        SELECT * FROM L2
+        UNION 
+        SELECT * FROM L3
+    ) AS combined
+) AS L2_EQ_L3
+FROM L2;
+
 --
 --  ──████████████──
 --  ─██░░░░░░░░░░██─
