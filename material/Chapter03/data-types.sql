@@ -28,6 +28,7 @@ INSERT INTO T VALUES
 SELECT 6.2 :: int;          -- ➝ 6
 SELECT 6.6 :: int;          -- ➝ 7
 SELECT date('May 4, 2022'); -- ➝ 2022-05-04 (May the Force ...)
+SELECT int(6.2);
 
 -- Implicit conversion if target type is known (here: schema of T)
 INSERT INTO T(a,b,c,d) VALUES (6.2, NULL, 'true', '0');

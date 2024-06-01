@@ -53,7 +53,32 @@ GROUP BY b.alt
 ORDER BY b.alt DESC;
 
 -----------------------------------------------------------------------
+--- Simplified given the fact that we look to right
 
+WITH
+p0(x, alt) AS (
+  SELECT :p0 as x, m.alt
+  FROM map as m
+  WHERE m.x = :p0
+),
+angles(x, angle) AS (
+  SELECT m.x, degrees(atan((m.alt - p0.alt) / (m.x - p0.x)))
+  FROM map as m, p0
+  WHERE m.x > p0.x
+),
+max_scan(x, max_angle) AS (
+  SELECT a.x,
+  MAX(a.angle) OVER (ORDER BY a.x)
+  FROM angles AS a
+),
+visibility(x, "visible?") AS (
+SELECT angles.x, angles.angle >= max_scan.max_angle
+FROM angles, max_scan
+WHERE angles.x = max_scan.x
+)
+TABLE visibility
+ORDER BY x;
+--------------
 
 WITH
 -- ➊ Location (x and altitude) of observer p₀

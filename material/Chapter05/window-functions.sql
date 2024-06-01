@@ -74,7 +74,8 @@ ORDER BY w.a, w.row;
 --
 SELECT w.row             AS "current row",
        w.a,
-       SUM(w.a) OVER win AS "∑ a (so far)"
+       SUM(w.a) OVER win AS "∑ a (so far)",
+       ROW_NUMBER() OVER win AS "row number"
 FROM   W AS w
 WINDOW win AS (ORDER BY w.a ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
 ORDER BY w.a, w.row;
